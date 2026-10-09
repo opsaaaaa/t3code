@@ -345,6 +345,11 @@ export interface PullRequestProviderApi {
   >;
   readonly kind: SourceControlProviderKind;
   readonly capabilities: PullRequestCapabilities;
+  /**
+   * Whether a merge may strip agent credits from the merge message when the project asks for
+   * it. Server-side only: clients see the effect, not the switch.
+   */
+  readonly removesAgentCreditsOnMerge?: boolean;
 
   /** The signed-in account, which is what involvement filtering compares against. */
   readonly getViewer: (input: {
@@ -561,7 +566,7 @@ export interface PullRequestProviderApi {
       readonly action: PullRequestAction;
       readonly stackNumber?: number;
       readonly expectedStackHeads?: ReadonlyArray<PullRequestStackHead>;
-      /** GitHub merge message cleanup; ignored by hosts without support. */
+      /** Merge message cleanup; only sent to a host with `removesAgentCreditsOnMerge`. */
       readonly removeAgentCreditsOnMerge?: boolean;
       /** Meaningful for `merge` and `enable-auto-merge`; absent takes the host's own default. */
       readonly mergeMethod?: PullRequestMergeMethod;
