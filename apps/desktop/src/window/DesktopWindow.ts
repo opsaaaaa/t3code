@@ -275,6 +275,13 @@ function getWindowTitleBarOptions(
     };
   }
 
+  if (platform === "linux") {
+    // Local build: no drawn window controls (the compositor owns close here,
+    // issue #15437). syncWindowAppearance skips setTitleBarOverlay without
+    // one; the header stays draggable via -webkit-app-region.
+    return { titleBarStyle: "hidden" };
+  }
+
   return {
     titleBarStyle: "hidden",
     titleBarOverlay: {
