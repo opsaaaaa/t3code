@@ -55,6 +55,7 @@ import * as VcsProjectConfig from "../vcs/VcsProjectConfig.ts";
 import * as VcsStatusBroadcaster from "../vcs/VcsStatusBroadcaster.ts";
 import * as BackgroundPolicy from "../background/BackgroundPolicy.ts";
 import * as GitWorkflowService from "./GitWorkflowService.ts";
+import * as ForgejoSourceControlProvider from "@t3tools/source-control-forgejo/server/ForgejoSourceControlProvider";
 import * as GitLabSourceControlProvider from "@t3tools/source-control-gitlab/server/GitLabSourceControlProvider";
 import {
   ForgejoPullRequestSchema,
@@ -545,6 +546,10 @@ function createGitHubProviderWithFakeGh(scenario: FakeGhScenario = {}): {
   return {
     service: {
       kind: "github",
+      // The GitHub provider's own capabilities, which GitManager reads instead of the kind.
+      headBranchProbeLimit: 100,
+      searchesOwnerHeadSelectors: false,
+      followsChangeRequestTemplates: true,
       listChangeRequests: (input) =>
         input.state === "open"
           ? execute({
@@ -4232,7 +4237,7 @@ it.layer(layerGitManagerTest)("GitManager", (it) => {
         };
         const repository = GitManager.parseRepositoryNameWithOwnerFromRemoteUrl(
           `https://forgejo.example/forgejo/${owner}/project.git`,
-          "forgejo",
+          { repositoryNameFromRemoteUrl: ForgejoSourceControlProvider.repositoryNameFromRemoteUrl },
         );
         expect(repository).toBe(`${owner}/project`);
         const context = {
@@ -4253,13 +4258,13 @@ it.layer(layerGitManagerTest)("GitManager", (it) => {
       expect(
         GitManager.parseRepositoryNameWithOwnerFromRemoteUrl(
           "git@forgejo.example:maria/project.git",
-          "forgejo",
+          { repositoryNameFromRemoteUrl: ForgejoSourceControlProvider.repositoryNameFromRemoteUrl },
         ),
       ).toBe("maria/project");
       expect(
         GitManager.parseRepositoryNameWithOwnerFromRemoteUrl(
           "https://gitlab.example/group/maria/project.git",
-          "gitlab",
+          {},
         ),
       ).toBe("group/maria/project");
     }),

@@ -92,10 +92,42 @@ export function sourceControlRefFromInput(input: {
   return input.source ?? parseSourceControlOwnerRef(input.headSelector);
 }
 
+/** The repository path a remote URL names (`owner/name`, or deeper for nested groups). */
+export function repositoryPathFromRemoteUrl(url: string | null): string | null {
+  const trimmed = url?.trim() ?? "";
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  const match =
+    /^(?:[^@/\s]+@[^:/\s]+:|(?:ssh|https?|git):\/\/[^/]+\/)((?:[^/\s]+\/)+[^/\s]+?)(?:\.git)?\/?$/iu.exec(
+      trimmed,
+    );
+  const path = match?.[1]?.trim() ?? "";
+  return path.length > 0 ? path : null;
+}
+
 export class SourceControlProvider extends Context.Service<
   SourceControlProvider,
   {
     readonly kind: SourceControlProviderKind;
+    /**
+     * How many change requests to read per head selector when looking up a branch's change
+     * request. Defaults to 1 for the open one and 20 for the latest of any state.
+     */
+    readonly headBranchProbeLimit?: number;
+    /**
+     * Whether a `owner:branch` head selector can be searched. When false, only bare branch
+     * selectors are probed and the owner is checked against the results instead.
+     */
+    readonly searchesOwnerHeadSelectors?: boolean;
+    /** Whether change request content generation follows the repository's PR template. */
+    readonly followsChangeRequestTemplates?: boolean;
+    /**
+     * The repository's `owner/name` from a remote URL, for a host whose remote paths can carry
+     * more than that (Forgejo's HTTP installation mount). Absent means the whole path.
+     */
+    readonly repositoryNameFromRemoteUrl?: (url: string) => string | null;
     /** Optional capability for issue and change-request subjects. */
     readonly resolveLink?: ResolveSourceControlLink;
     readonly listChangeRequests: (input: {

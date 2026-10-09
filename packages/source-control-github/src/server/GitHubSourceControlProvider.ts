@@ -939,6 +939,16 @@ export const make = Effect.gen(function* () {
 
   return SourceControlProvider.SourceControlProvider.of({
     kind: "github",
+    // Without the owner selector, a bare branch name also lists same-named branches on other
+    // forks (`main`, `patch-1`), so probes ask for a full page and let the owner check pick the
+    // right head. gh fetches up to 100 in one request, and GitHub prices a first:100
+    // connection like first:1.
+    headBranchProbeLimit: 100,
+    // `gh pr list --head` filters on the head ref name alone and accepts anything, so an
+    // `owner:branch` or `remote:branch` selector silently lists zero pull requests while
+    // spending a GraphQL call.
+    searchesOwnerHeadSelectors: false,
+    followsChangeRequestTemplates: true,
     resolveLink: (input) => {
       // Automatic enrichment must not send ambient CLI credentials to a host from message text.
       if (input.url.host !== "github.com") return undefined;
