@@ -298,6 +298,7 @@ export const make = Effect.gen(function* () {
   const provider: PullRequestProviderApi = {
     kind: "azure-devops",
     capabilities: CAPABILITIES,
+    addressesRepositoriesByCanonicalKey: true,
 
     getViewer: (input) =>
       cli.getViewer({ cwd: input.cwd }).pipe(Effect.mapError(fail("getViewer"))),

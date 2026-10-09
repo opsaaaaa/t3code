@@ -350,6 +350,12 @@ export interface PullRequestProviderApi {
    * it. Server-side only: clients see the effect, not the switch.
    */
   readonly removesAgentCreditsOnMerge?: boolean;
+  /**
+   * Whether repositories are addressed by the checkout's full canonical key (`host/org/project/
+   * repo`) rather than `owner/name`. Such a host derives its organization from the checkout, so a
+   * change request is only served by a checkout of that exact repository.
+   */
+  readonly addressesRepositoriesByCanonicalKey?: boolean;
 
   /** The signed-in account, which is what involvement filtering compares against. */
   readonly getViewer: (input: {
